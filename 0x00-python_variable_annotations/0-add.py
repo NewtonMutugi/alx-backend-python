@@ -1,7 +1,7 @@
-#!/usr/bin/python3
-""" type-annotated function add """
+#!/usr/bin/env python3
+"""type annotated function module"""
 
 
 def add(a: float, b: float) -> float:
-    """ takes 2 float arguments and returns their sum as a float """
+    """add two float numbers"""
     return a + b

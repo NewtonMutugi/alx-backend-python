@@ -50,3 +50,28 @@ class TestGithubOrgClient(unittest.TestCase):
         """ test_has_license """
         self.assertEqual(GithubOrgClient.has_license(repo, license_key),
                          expected)
+
+
+class TestIntegrationGithubOrgClient(unittest.TestCase):
+    """ TestIntegrationGithubOrgClient """
+    @classmethod
+    def setUpClass(cls):
+        """ setUpClass """
+        cls.get_patcher = patch('requests.get', side_effect=TEST_PAYLOAD)
+        cls.get_patcher.start()
+
+    @classmethod
+    def tearDownClass(cls):
+        """ tearDownClass """
+        cls.get_patcher.stop()
+
+    def test_public_repos(self):
+        """ test_public_repos """
+        test = GithubOrgClient("test")
+        self.assertEqual(test.public_repos(), [
+                         'Spoon-Knife', 'holbertonschool-zero_day',
+                         'Hello-World', 'test'])
+        self.assertEqual(test.public_repos("test"), ['test'])
+        self.assertEqual(test.public_repos("Holberton"), [])
+        self.assertEqual(test.public_repos(45), [])
+        self.assertEqual(test.public_repos("Hello-World"), ['Hello-World'])

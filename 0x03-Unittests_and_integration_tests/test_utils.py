@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """ test_utils.py """
 import unittest
+from client import GithubOrgClient
 from utils import access_nested_map, get_json, memoize
 from parameterized import parameterized
 from unittest.mock import patch, Mock
@@ -63,3 +64,47 @@ class TestMemoize(unittest.TestCase):
             test.a_property
             test.a_property
             mock.assert_called_once()
+
+
+class TestGithubOrgClient(unittest.TestCase):
+    """ TestGithubOrgClient """
+    @parameterized.expand([
+        ("google"),
+        ("abc"),
+    ])
+    @patch('client.get_json')
+    def test_org(self, test_org, mock):
+        """ test_org """
+        test_class = GithubOrgClient(test_org)
+        test_class.org()
+        mock.assert_called_once_with(f'https://api.github.com/orgs/{test_org}')
+
+    def test_public_repos_url(self):
+        """ test_public_repos_url """
+        with patch('client.GithubOrgClient.org',
+                   new_callable=PropertyMock) as mock:
+            test_class = GithubOrgClient("test")
+            test_class.org()
+            mock.assert_called_once()
+
+    @patch('client.GithubOrgClient._public_repos_url',
+           new_callable=PropertyMock)
+    def test_public_repos(self, mock):
+        """ test_public_repos """
+        mock.return_value = "https://api.github.com/orgs/google/repos"
+        with patch('client.get_json') as mock2:
+            test_class = GithubOrgClient("test")
+            test_class.public_repos()
+            mock2.assert_called_once_with(
+                "https://api.github.com/orgs/google/repos")
+
+    @parameterized.expand([
+        ("google", {"license": {"key": "my_license"}}),
+        ("abc", {"license": {"key": "other_license"}}),
+    ])
+    def test_has_license(self, test_org, test_license):
+        """ test_has_license """
+        self.assertTrue(hasattr(GithubOrgClient, 'has_license'))
+        test_class = GithubOrgClient(test_org)
+        self.assertEqual(test_class.has_license(test_license, "my_license"),
+                         test_license["license"]["key"] == "my_license")

@@ -6,6 +6,7 @@ from unittest.mock import patch, PropertyMock
 from parameterized import parameterized
 from client import GithubOrgClient
 from fixtures import TEST_PAYLOAD
+from unittest.mock import patch, PropertyMock, Mock
 
 
 class TestGithubOrgClient(unittest.TestCase):
@@ -59,6 +60,7 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         """ setUpClass """
         cls.get_patcher = patch('requests.get', side_effect=TEST_PAYLOAD)
         cls.get_patcher.start()
+        cls.mock = cls.get_patcher.start()
 
     @classmethod
     def tearDownClass(cls):
@@ -66,10 +68,21 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
         cls.get_patcher.stop()
 
     def test_public_repos(self):
-        """ test_public_repos """
-        test = GithubOrgClient("test")
-        self.assertEqual(test.public_repos(), ['Spoon-Knife', 'holbertonschool\
--low_level_programming', 'holbertonschool-zero_day'])
-        self.assertEqual(test.public_repos("Spoon-Knife"), False)
-        self.assertEqual(test.public_repos(45), False)
-        self.assertEqual(test.public_repos("test"), [])
+        """ Integration test: public repos"""
+        test_class = GithubOrgClient("google")
+
+        self.assertEqual(test_class.org, self.org_payload)
+        self.assertEqual(test_class.repos_payload, self.repos_payload)
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("XLICENSE"), [])
+        self.mock.assert_called()
+
+    def test_public_repos_with_license(self):
+        """ Integration test for public repos with License """
+        test_class = GithubOrgClient("google")
+
+        self.assertEqual(test_class.public_repos(), self.expected_repos)
+        self.assertEqual(test_class.public_repos("XLICENSE"), [])
+        self.assertEqual(test_class.public_repos(
+            "apache-2.0"), self.apache2_repos)
+        self.mock.assert_called()

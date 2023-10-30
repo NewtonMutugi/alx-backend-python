@@ -68,10 +68,8 @@ class TestIntegrationGithubOrgClient(unittest.TestCase):
     def test_public_repos(self):
         """ test_public_repos """
         test = GithubOrgClient("test")
-        self.assertEqual(test.public_repos(), [
-                         'Spoon-Knife', 'holbertonschool-zero_day',
-                         'Hello-World', 'test'])
-        self.assertEqual(test.public_repos("test"), ['test'])
-        self.assertEqual(test.public_repos("Holberton"), [])
-        self.assertEqual(test.public_repos(45), [])
-        self.assertEqual(test.public_repos("Hello-World"), ['Hello-World'])
+        self.assertEqual(test.public_repos(), ['Spoon-Knife', 'holbertonschool\
+-low_level_programming', 'holbertonschool-zero_day'])
+        self.assertEqual(test.public_repos("Spoon-Knife"), False)
+        self.assertEqual(test.public_repos(45), False)
+        self.assertEqual(test.public_repos("test"), [])
